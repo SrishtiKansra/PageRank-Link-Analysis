@@ -23,6 +23,7 @@ Subset used:
 ## <img width="25" height="25" alt="image" src="https://github.com/user-attachments/assets/424c0fc4-8606-4ef3-bc49-72717e69f9c3" /> Repository Structure
 - `Project3_PageRank_Link_Analysis.ipynb` : Main notebook
 - `Project3_Report.pdf` : Project report
+- `Project3_Report.tex` : LaTeX source file
 - `README.md` : Repository description
 
 ## 🎯 Main Results
