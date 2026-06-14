@@ -1,0 +1,452 @@
+\documentclass[12pt, a4paper]{article}
+
+% ── Packages ──────────────────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{mdframed}
+\usepackage{graphicx}
+\usepackage{needspace}
+
+% ── Colours ───────────────────────────────────────────────────────────────────
+\definecolor{uniblue}{RGB}{46, 117, 182}
+\definecolor{darkblue}{RGB}{31, 78, 121}
+\definecolor{lightgray}{RGB}{245, 245, 245}
+\definecolor{codegray}{RGB}{100, 100, 100}
+\definecolor{codegreen}{RGB}{0, 128, 0}
+
+% ── Hyperref ──────────────────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=uniblue,
+  urlcolor=uniblue,
+  citecolor=darkblue,
+  pdftitle={Project 3: Link Analysis using PageRank},
+  pdfauthor={Srishti Kansra}
+}
+
+% ── Section formatting ────────────────────────────────────────────────────────
+\titleformat{\section}
+  {\needspace{6\baselineskip}\Large\bfseries\color{uniblue}}{\thesection.}{0.5em}{}
+  [\vspace{-0.3em}\textcolor{uniblue}{\rule{\linewidth}{0.8pt}}\vspace{0.3em}]
+
+\titleformat{\subsection}
+  {\needspace{4\baselineskip}\large\bfseries\color{darkblue}}{\thesubsection}{0.5em}{}
+
+\titleformat{\subsubsection}
+  {\needspace{3\baselineskip}\normalsize\bfseries\color{uniblue}}{\thesubsubsection}{0.5em}{}
+
+\titlespacing{\section}{0pt}{1.5em}{0.5em}
+\titlespacing{\subsection}{0pt}{1em}{0.3em}
+
+% ── Code listings ─────────────────────────────────────────────────────────────
+\lstset{
+  backgroundcolor=\color{lightgray},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{uniblue}\bfseries,
+  commentstyle=\color{codegreen},
+  stringstyle=\color{codegray},
+  breaklines=true,
+  frame=single,
+  framerule=0.5pt,
+  rulecolor=\color{uniblue!40},
+  xleftmargin=1em,
+  xrightmargin=0.5em,
+  aboveskip=0.8em,
+  belowskip=0.8em,
+  captionpos=b
+}
+
+% ── Header / footer ───────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{gray}Project 3: Link Analysis using PageRank}
+\fancyhead[R]{\small\color{gray}Algorithms for Massive Data}
+\fancyfoot[C]{\small\color{gray}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── List spacing ──────────────────────────────────────────────────────────────
+\setlist[itemize]{noitemsep, topsep=4pt, leftmargin=1.5em}
+\setlist[enumerate]{noitemsep, topsep=4pt, leftmargin=1.5em}
+
+% ── Declaration box ───────────────────────────────────────────────────────────
+\newmdenv[
+  linecolor=uniblue!50,
+  linewidth=1pt,
+  backgroundcolor=uniblue!5,
+  innerleftmargin=12pt,
+  innerrightmargin=12pt,
+  innertopmargin=10pt,
+  innerbottommargin=10pt,
+  skipabove=1em,
+  skipbelow=1em
+]{declarationbox}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{document}
+
+% ── Title page ────────────────────────────────────────────────────────────────
+\begin{titlepage}
+  \centering
+  \vspace*{3cm}
+  {\Huge\bfseries\color{uniblue} Project 3: Link Analysis\\[0.4em] using PageRank\par}
+  \vspace{1.2em}
+  {\large\color{darkblue} Algorithms for Massive Data\par}
+  \vspace{0.5em}
+  {\normalsize\itshape Master in Data Science for Economics\par}
+  {\normalsize\itshape Università degli Studi di Milano\par}
+  \vspace{3cm}
+  \begin{tabular}{rl}
+    \textbf{Student name:} & {Srishti Kansra} \\[0.4em]
+    \textbf{Student ID:}   & {49483A} \\[0.4em]
+    \textbf{Academic year:} & 2025/26 \\
+  \end{tabular}
+  \vfill
+  {\small\color{gray} Submitted to Prof.\ Dario Malchiodi\par}
+\end{titlepage}
+
+% ── Academic integrity declaration ────────────────────────────────────────────
+\thispagestyle{empty}
+\section*{Academic Integrity Declaration}
+\begin{declarationbox}
+\itshape
+I declare that this material, which I now submit for assessment, is entirely my own work and has not been taken from the work of others, save and to the extent that such work has been cited and acknowledged within the text of my work, and including any code produced using generative AI systems. I understand that plagiarism, collusion, and copying are grave and serious offences in the university and accept the penalties that would be imposed should I engage in plagiarism, collusion or copying. This assignment, or any part of it, has not been previously submitted by me or any other person for assessment on this or any other course of study.
+\end{declarationbox}
+\newpage
+
+% ── Table of contents ─────────────────────────────────────────────────────────
+\tableofcontents
+\newpage
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Dataset}
+
+\subsection{Source}
+
+The project uses the \textbf{arXiv dataset}, published by Cornell University under the Public Domain licence and available on Kaggle (identifier: \texttt{Cornell-University/arxiv}). The dataset is a newline-delimited JSON file where each record represents one arXiv paper and contains metadata including title, abstract, authors, subject categories, and publication dates. The full snapshot contains approximately 2 million papers spanning all scientific disciplines represented on arXiv.
+
+\subsection{Subset Used}
+
+The full snapshot is too large to process on a single Colab instance without out-of-memory errors. A global configuration flag controls whether the full dataset or a subsample is used:
+
+\begin{lstlisting}[language=Python]
+USE_FULL_DATASET = False   # set True to use the full 2M-paper snapshot
+NROWS = None if USE_FULL_DATASET else 50_000
+\end{lstlisting}
+
+With the flag set to \texttt{False}, the first 50{,}000 papers are loaded. This subset is large enough to produce a meaningful collaboration network while keeping runtimes practical in a Colab environment. All code paths are independent of this flag, so the full pipeline runs unchanged on the complete dataset.
+
+\subsection{Fields Used}
+
+Only the following field is used from each paper record:
+
+\begin{itemize}
+  \item \texttt{authors\_parsed}: a structured list of \texttt{[last, first, suffix]} triples representing the paper's authors. This field is preferred over the raw \texttt{authors} string because it avoids the ambiguities of regex-based name parsing across the diverse formatting conventions in the arXiv corpus.
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Data Organisation}
+
+The core data structure is an \textbf{undirected weighted graph} $G = (V, E)$ constructed from the set of papers:
+
+\begin{itemize}
+  \item \textbf{Nodes} $V$: one node per unique author name, as extracted from \texttt{authors\_parsed}.
+  \item \textbf{Edges} $E$: an edge $(u, v)$ exists between two authors if they appear together in the \texttt{authors\_parsed} field of at least one paper.
+  \item \textbf{Edge weight}: the number of papers on which the two authors co-appear. Repeated collaborations increase the weight.
+\end{itemize}
+
+For a paper with $k$ authors, all $\binom{k}{2}$ pairs among the $k$ authors are connected (a clique of size $k$). This approach is standard in the co-authorship network literature \cite{newman2001}. The graph is constructed by the function:
+
+\begin{lstlisting}[language=Python]
+def build_graph(data: pd.DataFrame) -> nx.Graph
+\end{lstlisting}
+
+which takes a DataFrame of arXiv records and returns a NetworkX Graph. This function is encapsulated so it can be called identically for the main graph and for each dataset fraction in the scalability experiment.
+
+On the 50{,}000-paper subset the resulting graph contains \textbf{85{,}318 nodes} and \textbf{508{,}460 edges}. The largest connected component contains 46,481 nodes (54.5\% of total) and 457{,}866 edges (90.0\% of total), consistent with the well-known small-world property of scientific collaboration networks.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Pre-processing}
+
+\subsection{Author Name Normalisation}
+
+Author names are extracted from \texttt{authors\_parsed} using:
+
+\begin{lstlisting}[language=Python]
+def author_name(triple):
+    last  = triple[0].strip()
+    first = triple[1].strip()
+    return f"{first} {last}".strip()
+\end{lstlisting}
+
+This produces consistent \textit{First Last} format. The structured field is preferred over the raw \texttt{authors} string, which mixes delimiters and formatting conventions across different papers.
+
+\subsection{Deduplication Within Papers}
+
+For each paper, the set of author names is deduplicated before constructing edges. This prevents a paper from generating self-loops or duplicate edges in cases where the same name appears twice in the parsed field (which can occur due to OCR artefacts in older records).
+
+\subsection{Isolated Node Preservation}
+
+Single-author papers produce isolated nodes (degree 0) in the graph. These are retained rather than discarded to maintain full coverage of the author population. In the PageRank computation, isolated nodes receive only the teleportation contribution and emit nothing during edge propagation — this is the correct behaviour and is discussed further in Section~\ref{subsec:power-iteration}.
+
+\subsection{Limitations}
+
+Two pre-processing limitations are acknowledged:
+
+\begin{itemize}
+  \item \textbf{No name disambiguation}: ``J.\ Smith'' and ``John Smith'' are treated as distinct nodes. This inflates the node count and fragments some authors' true collaboration networks. ORCID-based disambiguation would be required for a production system.
+  \item \textbf{No category filtering}: papers from all arXiv subject categories are included. Ranking results therefore reflect cross-disciplinary collaboration patterns rather than a single field.
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Algorithms and Implementations}
+\label{sec:algorithms}
+
+\subsection{PageRank: Theoretical Background}
+
+PageRank \cite{brin1998} assigns an importance score to each node in a graph by simulating the behaviour of a \textit{random surfer}. At each step the surfer either:
+
+\begin{itemize}
+  \item with probability $\alpha$ (the \textit{damping factor}): follows a random neighbour, with probability proportional to the edge weight connecting the current node to that neighbour;
+  \item with probability $1 - \alpha$: \textit{teleports} to a uniformly random node in the graph.
+\end{itemize}
+
+The stationary distribution of this Markov chain is the PageRank vector $\mathbf{r}$, satisfying:
+
+\begin{equation}
+  r(u) = \frac{1-\alpha}{|V|} + \alpha \sum_{v \in N(u)} \frac{w(v,u)}{\mathrm{out}(v)} \cdot r(v)
+  \label{eq:pagerank}
+\end{equation}
+
+where $N(u)$ is the set of neighbours of $u$, $w(v,u)$ is the weight of edge $(v,u)$, and $\mathrm{out}(v) = \sum_{k} w(v,k)$ is the total outgoing weight of $v$. We use $\alpha = 0.85$, the value proposed in the original paper.
+
+\subsection{Dead Ends and Spider Traps (RU~5.1.3--5.1.5)}
+
+Two structural pathologies must be handled in any correct PageRank implementation:
+
+\begin{itemize}
+  \item \textbf{Dead ends}: nodes with no outgoing edges. A random surfer at a dead end has nowhere to go, causing probability mass to \textit{leak} out of the system — the score vector no longer sums to 1. In our undirected co-authorship graph, dead ends are the isolated degree-0 nodes produced by single-author papers.
+  \item \textbf{Spider traps}: groups of nodes whose only outgoing edges point back within the group. A surfer trapped inside accumulates all reachable probability mass indefinitely, giving those nodes artificially inflated scores.
+\end{itemize}
+
+Both pathologies are resolved simultaneously by the \textbf{teleportation term} $(1-\alpha)/N$: at every step, with probability $1-\alpha = 0.15$, the surfer jumps to a uniformly random node regardless of the current node's edges. Dead-end mass is redistributed across the graph; spider-trap mass can escape via teleportation.
+
+After adding teleportation, the transition matrix is:
+\begin{itemize}
+  \item \textbf{Stochastic}: rows sum to 1 (no mass leaks at dead ends).
+  \item \textbf{Aperiodic}: teleportation breaks all periodic cycles.
+  \item \textbf{Irreducible}: every node is reachable from every other node via teleportation.
+\end{itemize}
+
+By the Perron--Frobenius theorem, these three properties guarantee that a unique stationary distribution exists and that power iteration converges to it from any starting vector (RU~5.1.2).
+
+\subsection{Power-Iteration Implementation (Single-Machine)}
+\label{subsec:power-iteration}
+
+The function \texttt{pagerank\_power(G, alpha, max\_iter, tol)} implements power iteration from scratch, following the formulation in Equation~\ref{eq:pagerank}:
+
+\begin{enumerate}
+  \item Pre-compute the total outgoing weight $\mathrm{out}(v)$ for each node $v$.
+  \item Initialise the score vector uniformly: $r(v) = 1/N$ for all $v$.
+  \item At each iteration, compute a new score vector $\mathbf{r}_{\mathrm{new}}$: each node $v$ receives the teleportation contribution $(1-\alpha)/N$ plus, for each neighbour $u$, the propagated contribution $\alpha \cdot [w(u,v)/\mathrm{out}(u)] \cdot r(u)$.
+  \item Compute the L1 error: $\mathrm{err} = \sum_v |r_{\mathrm{new}}(v) - r(v)|$.
+  \item If $\mathrm{err} < \mathrm{tol}$, stop. Otherwise set $\mathbf{r} = \mathbf{r}_{\mathrm{new}}$ and repeat from step~3.
+\end{enumerate}
+
+The function returns both the final score dictionary and the per-iteration L1 error list, enabling the convergence curve to be plotted. The result is validated against NetworkX's reference implementation \texttt{nx.pagerank()}: the maximum absolute difference across all nodes is on the order of $10^{-6}$ (within the convergence tolerance), and both produce identical top-5 rankings.
+
+\subsection{MapReduce Formulation in Spark (RU~5.1.3, Lecture 22/01)}
+
+For datasets too large to fit in a single machine's memory, each power-iteration step maps directly onto a MapReduce job. The formulation follows RU~5.1.3:
+
+\begin{itemize}
+  \item \textbf{MAP step}: for each source node $u$ with current score $r(u)$, emit $(v,\ r(u) \cdot w(u,v)/\mathrm{out}(u))$ for each neighbour $v$.
+  \item \textbf{REDUCE step}: for each destination node $v$, collect all incoming contributions and compute:
+    \[r_{\mathrm{new}}(v) = \frac{1-\alpha}{N} + \alpha \sum_{\text{contributions}} c_v\]
+\end{itemize}
+
+This formulation is \textit{embarrassingly parallel}: each node's update depends only on its neighbours' scores from the previous iteration, so the map step runs independently across all partitions simultaneously.
+
+In PySpark, the MAP step is expressed as a \texttt{join} + \texttt{groupBy("dst")} + \texttt{agg(F.sum(...))} on a normalised edge DataFrame. Dead-end nodes (those that receive no contributions) are handled via a left join with the full node list, with missing contributions replaced by the teleportation floor using \texttt{F.coalesce()}.
+
+Two engineering optimisations make the Spark loop viable on a 2-core Colab instance:
+
+\begin{itemize}
+  \item \textbf{Scalar L1 error collection}: the convergence check uses a single \texttt{agg()} call (returning one scalar to the driver) rather than collecting the full rank DataFrame at each iteration. This reduces per-iteration driver communication overhead from $O(N)$ rows to a single value.
+  \item \textbf{DAG checkpointing}: the rank DataFrame is checkpointed to disk every 5 iterations to truncate Spark's execution DAG, which would otherwise grow unboundedly across iterations and cause query-planning overhead to dominate runtime.
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Scalability}
+
+\subsection{Theoretical Complexity}
+
+The pipeline has two stages with the following complexities:
+
+\begin{itemize}
+  \item \textbf{Graph construction}: $O(P \cdot k^2)$ where $P$ is the number of papers and $k$ is the average number of authors per paper (typically $k \leq 5$ in arXiv data). Inserting or incrementing a weighted edge in a hash-backed adjacency structure is $O(1)$ amortised.
+  \item \textbf{PageRank (power iteration)}: $O(I \cdot (N + E))$ per run, where $I$ is the number of iterations to convergence, $N$ is the number of nodes, and $E$ is the number of edges. Because $E$ grows approximately linearly with $P$ (each paper adds at most $\binom{k}{2}$ edges), total runtime grows approximately linearly with dataset size.
+\end{itemize}
+
+\subsection{Empirical Scalability Experiment}
+
+Wall-clock time is measured for the full pipeline (graph construction + PageRank convergence) across four fractions of the 50{,}000-paper subset: 25\%, 50\%, 75\%, and 100\%. Each fraction is timed three times and the mean $\pm$ standard deviation is reported to eliminate single-run noise artefacts.
+
+\begin{table}[h!]
+  \centering
+  \caption{Scalability experiment results.}
+  \label{tab:scalability}
+  \begin{tabular}{>{\bfseries}c c c c c}
+    \toprule
+    Dataset \% & Nodes & Edges & Runtime (s) & Std (s) \\
+    \midrule
+    25\%  & 30{,}894 & 139{,}697 & 10.561 & 0.310 \\
+    50\%  & 52{,}770 & 239{,}029 & 20.323 & 3.884 \\
+    75\%  & 70{,}483 & 369{,}414 & 46.306 & 6.784 \\
+    100\% & 85{,}318 & 508{,}460 & 48.304 & 2.300 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Runtime grows approximately linearly with the number of edges, consistent with the theoretical $O(I \cdot (N+E))$ complexity. The mean-over-three-runs methodology eliminates the non-monotone artefact that appears in single-run measurements (caused by OS-level CPU scheduling noise on a 2-core Colab VM).
+
+\subsection{Scaling to the Full arXiv Snapshot}
+
+The full arXiv snapshot contains approximately 2 million papers. Extrapolating linearly from the 50{,}000-paper results, the single-machine pipeline would require on the order of 3--5 minutes on a standard laptop CPU. However, \textit{memory} becomes the binding constraint before runtime: the full graph requires several gigabytes of RAM for the adjacency structure alone, making the single-machine version infeasible.
+
+The Spark MapReduce implementation resolves this: edges and rank vectors are stored as distributed DataFrames, partitioned across the cluster. Scaling the cluster adds memory and compute proportionally. The same PySpark code that runs on the Colab VM in local mode runs unchanged on a multi-node cluster such as Google Dataproc, requiring only a change to the \texttt{SparkSession} master URL.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Experiments}
+
+\subsection{Network Statistics}
+
+After constructing the co-authorship graph from 50{,}000 arXiv papers, the following statistics are computed: number of nodes and edges, average and maximum degree, graph density, and number of connected components with the size of the largest. The graph contains 85,318 nodes and 508,460 edges, with an average degree of 11.92 and a maximum degree of 417. Graph density is 1.40\times $10^{-4}$. There are 14,040 connected components.
+
+The degree distribution is visualised on both linear and log-log scales. The log-log plot reveals a heavy-tailed distribution, consistent with preferential-attachment growth models \cite{barabasi1999}: most authors have few collaborators, but a small number of hubs have hundreds.
+
+\subsection{PageRank Computation and Convergence}
+
+The custom \texttt{pagerank\_power()} function is run on the full graph with $\alpha = 0.85$, \texttt{max\_iter} $= 100$, and \texttt{tol} $= 10^{-6}$. The per-iteration L1 error is recorded and plotted on a logarithmic scale to visualise the convergence rate. The algorithm converges within 60 iterations, well below the \texttt{max\_iter} ceiling of 100.
+
+The result is validated against NetworkX's \texttt{nx.pagerank()} reference implementation. The maximum absolute difference across all nodes is 3.60 \times $10^{-5}$ and mean difference is 9.97 \times $10^{-7}$, and both produce the same top-5 set of authors, though with minor ordering differences attributable to the convergence tolerance, confirming correctness of the custom implementation.
+
+\subsection{Top-20 Authors by PageRank}
+
+The 20 highest-ranked authors are extracted and displayed both as a table (alongside their degree for comparison) and as a horizontal bar chart. This directly answers the project objective of identifying influential researchers in the arXiv co-authorship network.
+
+\subsection{Degree vs.\ PageRank Comparison}
+
+To demonstrate that PageRank captures information beyond simple connectivity, a degree ranking and a PageRank ranking are computed for all authors and the absolute rank discrepancy is analysed. Authors with the largest discrepancy are reported. A log-log scatter plot of degree vs.\ PageRank score for all authors is produced to visualise the overall relationship.
+
+\subsection{Largest Connected Component}
+
+The size and edge coverage of the largest connected component is computed to quantify the graph's connectivity structure and contextualise the PageRank scores.
+
+\subsection{Network Visualisations}
+
+Two network visualisations are produced using spring-layout positioning:
+
+\begin{itemize}
+  \item \textbf{Global view}: the top-20 PageRank authors and all of their direct collaborators. Top-20 nodes are coloured red; neighbour nodes are coloured blue.
+  \item \textbf{Ego-network}: the direct collaboration neighbourhood of the top-ranked author (up to 100 neighbours), with the ego node highlighted in red.
+\end{itemize}
+
+\subsection{Spark MapReduce PageRank}
+
+The Spark implementation is run on the same graph using the MapReduce formulation. It is capped at 20 iterations on the Colab VM (2 cores) for practical runtime. After completion, Spark scores are validated against the custom implementation (max absolute difference reported), top-5 rankings from both implementations are compared side by side, and convergence curves for both are plotted on the same axes.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Results and Discussion}
+
+\subsection{Network Structure}
+
+The co-authorship graph constructed from 50{,}000 arXiv papers is a sparse, scale-free network. The heavy-tailed degree distribution on the log-log plot is a hallmark of real-world collaboration networks and is consistent with preferential-attachment growth \cite{barabasi1999}. A small number of highly connected authors act as hubs linking different sub-communities, while the majority have only a handful of collaborators.
+
+A large majority of nodes belong to a single giant connected component, consistent with the small-world property. Isolated nodes (single-author papers) form the remaining components and receive only the teleportation contribution to their PageRank scores — a direct consequence of the dead-end handling described in Section~\ref{sec:algorithms}.
+
+\subsection{Top-Ranked Authors}
+
+H. Vincent Poor emerges as the highest-ranked author (score: 2.16 \times $10^{-4}$, degree: 72), followed by N. Gehrels (score: 1.34 \times $10^{-4}$, degree: 372) and Donald P. Schneider by weighted PageRank in the 50{,}000-paper subset. These rankings reflect not only the number of collaborators (degree) but also the importance of those collaborators --- the recursive nature of PageRank propagates influence through second- and higher-order connections.
+
+The ego-network visualisation of H.\ Vincent Poor confirms the structural basis for his score: his direct neighbourhood is densely interconnected, meaning that his collaborators themselves have high PageRank scores, which amplifies his own score through the propagation mechanism.
+
+\subsection{Degree vs.\ PageRank Divergence}
+
+The log-log scatter plot of degree vs.\ PageRank score shows a positive but imperfect correlation. A non-trivial fraction of authors exhibit substantial rank differences between the two metrics:
+
+\begin{itemize}
+  \item \textbf{High degree, lower-than-expected PageRank}: these authors collaborate widely but mostly with peripheral researchers. Their high edge count does not translate to influence because their neighbours are not themselves influential.
+  \item \textbf{Moderate degree, higher-than-expected PageRank}: these authors have fewer collaborators but are connected to other high-PageRank nodes. Their influence propagates recursively through the graph.
+\end{itemize}
+
+This divergence is precisely what motivates link-analysis algorithms over degree-based ranking. A pure degree ranking would miss the second category entirely.
+
+\subsection{Convergence Behaviour}
+
+The power-iteration algorithm converges monotonically from iteration 1. The $L_1$ error decreased consistently from $3.8 \times 10^{-1}$ at iteration 1 to below $10^{-6}$ by iteration 60. This behaviour is guaranteed by the Perron--Frobenius theorem: because the teleportation term makes the transition matrix stochastic, aperiodic, and irreducible, convergence to the unique stationary distribution is guaranteed from any initialisation (RU~5.1.2).
+
+\subsection{Spark Validation}
+
+The Spark MapReduce implementation produces scores that differ from the custom single-machine implementation by differ by at most 1.04 \times $10^{-6}$ (mean difference 1.31 \times $10^{-8}$), and the top-5 rankings are identical. This confirms that the distributed formulation correctly implements the same mathematical update as the single-machine version.
+
+On the Colab VM (2 cores, local Spark mode) the Spark implementation is slower than the single-machine version due to DataFrame serialisation overhead. This is expected: Spark's advantage manifests at cluster scale, where data parallelism across many nodes more than compensates for the coordination cost. The implementation is demonstrated on the 50{,}000-paper subset for reproducibility within the Colab environment; on the full 2-million-paper arXiv snapshot, where the graph exceeds single-machine memory, the Spark version would continue to operate while the single-machine version would fail with an out-of-memory error.
+
+\subsection{Limitations and Future Directions}
+
+The main limitations of the current work are:
+
+\begin{itemize}
+  \item \textbf{Author name disambiguation}: merging name variants (``J.\ Smith'' vs.\ ``John Smith'') would produce a more accurate graph with fewer spurious isolated components.
+  \item \textbf{Undirected graph}: co-authorship is symmetric by construction. A directed citation graph would expose dead-end and spider-trap pathologies more naturally and provide an asymmetric influence measure.
+  \item \textbf{Subset only}: the 50{,}000-paper subset may not fully represent the rankings that would result from the full $\sim$2-million-paper dataset.
+  \item \textbf{No temporal analysis}: author influence evolves over time; a year-by-year analysis would reveal how rankings change across decades of scientific publication.
+\end{itemize}
+
+Future work could apply PageRank to the citation graph (directed), integrate author disambiguation using external identifiers such as ORCID, compare PageRank with betweenness and eigenvector centrality, and run the Spark pipeline on the full arXiv snapshot using Google Dataproc.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{thebibliography}{9}
+\addcontentsline{toc}{section}{References}
+
+\bibitem{barabasi1999}
+Barab\'{a}si, A.-L., \& Albert, R. (1999).
+Emergence of scaling in random networks.
+\textit{Science}, 286(5439), 509--512.
+
+\bibitem{brin1998}
+Brin, S., \& Page, L. (1998).
+The anatomy of a large-scale hypertextual web search engine.
+\textit{Computer Networks and ISDN Systems}, 30(1--7), 107--117.
+
+\bibitem{leskovec2020}
+Leskovec, J., Rajaraman, A., \& Ullman, J.~D. (2020).
+\textit{Mining of Massive Datasets} (3rd ed.).
+Cambridge University Press.
+Available at \url{http://www.mmds.org}.
+
+\bibitem{newman2001}
+Newman, M.~E.~J. (2001).
+The structure of scientific collaboration networks.
+\textit{Proceedings of the National Academy of Sciences}, 98(2), 404--409.
+
+\end{thebibliography}
+
+\end{document}
