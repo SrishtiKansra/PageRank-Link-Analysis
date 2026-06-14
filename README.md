@@ -1,4 +1,4 @@
-# PageRank Link Analysis
+# PageRank Link Analysis [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/SrishtiKansra/PageRank-Link-Analysis/blob/main/Project3_PageRank_Link_Analysis.ipynb)
 
 Implementation of PageRank on an arXiv co-authorship network for Project 3 of Algorithms for Massive Data.
 
